@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Launch Radar — pre-token protocols ranked by implied value</title>
+<meta name="description" content="A radar ranking DefiLlama protocols that record no token yet, by implied launch value, with a farm plan for each.">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<a class="skip" href="#board-title">Skip to the board</a>
+<div class="shell">
+
+  <header class="top">
+    <div class="intro">
+      <p class="eyebrow"><span class="pulse" aria-hidden="true"></span><span id="eyebrow">Token Launch Radar</span></p>
+      <h1>Token Launch Radar</h1>
+      <p class="lede">Every protocol in the DefiLlama snapshot that <strong>records no token</strong>, ranked by
+        implied launch value — strongest first. The watchlist is the floor; the early radar adds
+        pre-token protocols below it, by TVL.</p>
+      <p class="model-line" id="model-line">Implied value = TVL &times; the median live market-cap/TVL of its category family,
+        adjusted for seven-day growth and for age with no token. One formula scores every row; no name is special-cased.</p>
+    </div>
+    <dl class="stats" id="stats">
+      <div class="stat"><dt>Watchlist covered</dt><dd id="stat-watchlist">&ndash;</dd></div>
+      <div class="stat"><dt>Pre-token rows scored</dt><dd id="stat-board">&ndash;</dd></div>
+      <div class="stat"><dt>Early rows below the floor</dt><dd id="stat-early">&ndash;</dd></div>
+      <div class="stat"><dt>Live tokens set aside</dt><dd id="stat-live">&ndash;</dd></div>
+    </dl>
+  </header>
+
+  <section class="controls" aria-label="Filter the board">
+    <div class="field grow">
+      <label for="q">Search</label>
+      <input id="q" type="search" placeholder="Search name, slug, category or chain" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="field">
+      <label for="category">Category</label>
+      <select id="category"><option value="all">All categories</option></select>
+    </div>
+    <div class="field">
+      <label for="chain">Chain</label>
+      <select id="chain"><option value="all">All chains</option></select>
+    </div>
+    <div class="field">
+      <label for="min-tvl">Min TVL (USD)</label>
+      <input id="min-tvl" type="number" min="0" step="1000000" inputmode="numeric" placeholder="e.g. 100000000">
+    </div>
+    <label class="toggle" for="watchlist-only">
+      <input id="watchlist-only" type="checkbox">
+      <span class="toggle-box" aria-hidden="true"></span>
+      <span>Watchlist only</span>
+    </label>
+    <button id="clear-filters" class="button" type="button">Clear filters</button>
+    <p class="count" id="count" role="status"></p>
+  </section>
+
+  <main id="board">
+    <section class="panel" aria-labelledby="board-title">
+      <div class="panel-head">
+        <div>
+          <h2 id="board-title" tabindex="-1">Ranked board</h2>
+          <p class="panel-note">Pre-token protocols, strongest implied value first. Click a column to sort.
+            Click a row for its model breakdown and farm plan.</p>
+        </div>
+        <p class="panel-meta" id="board-meta"></p>
+      </div>
+      <div class="table-wrap">
+        <table id="board-table">
+          <caption>Pre-token protocols ranked by implied launch value. Select a row for its detail view.</caption>
+          <thead>
+            <tr>
+              <th scope="col"><button type="button" data-sort="rank" aria-label="Sort by rank">Rank</button></th>
+              <th scope="col"><button type="button" data-sort="name" aria-label="Sort by protocol name">Protocol</button></th>
+              <th scope="col"><button type="button" data-sort="tvl" aria-label="Sort by total value locked">TVL</button></th>
+              <th scope="col"><button type="button" data-sort="growth" aria-label="Sort by seven-day change">7d</button></th>
+              <th scope="col"><button type="button" data-sort="age" aria-label="Sort by age with no token">Age</button></th>
+              <th scope="col"><button type="button" data-sort="implied" aria-label="Sort by implied value">Implied value</button></th>
+              <th scope="col">Token</th>
+            </tr>
+          </thead>
+          <tbody id="board-body"></tbody>
+        </table>
+        <div id="board-empty" class="empty" hidden>
+          <h3>No protocol matches that filter</h3>
+          <p>Clear the search or pick another category or chain to see the board again.</p>
+          <button class="button primary" type="button" id="empty-clear">Clear filters</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel live-panel" aria-labelledby="live-title">
+      <div class="panel-head">
+        <div>
+          <h2 id="live-title">Live tokens — set aside</h2>
+          <p class="panel-note">These protocols already trade, so their market cap is a fact, not a model.
+            They are kept out of the ranked board on purpose.</p>
+        </div>
+        <p class="panel-meta" id="live-meta"></p>
+      </div>
+      <div class="table-wrap">
+        <table id="live-table">
+          <caption>Protocols that already have a live token, ordered by market cap. Not part of the ranking.</caption>
+          <thead>
+            <tr>
+              <th scope="col">Status</th>
+              <th scope="col">Protocol</th>
+              <th scope="col">TVL</th>
+              <th scope="col">7d</th>
+              <th scope="col">Market cap</th>
+              <th scope="col">Token</th>
+            </tr>
+          </thead>
+          <tbody id="live-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <aside id="detail" class="detail" hidden aria-labelledby="detail-title">
+    <div class="detail-inner" id="detail-inner"></div>
+  </aside>
+  <div id="detail-scrim" class="scrim" hidden></div>
+
+  <footer class="foot">
+    <h2>How implied value is computed</h2>
+    <p id="formula" class="formula">implied = round( TVL &times; family multiple &times; growth multiplier &times; maturity multiplier &times; new-protocol penalty &times; breadth multiplier )</p>
+    <p id="model-notes" class="foot-note">TVL and seven-day growth come from the snapshot. Age is the time
+      since the protocol was first listed — the best record of how long it has run with no token.</p>
+    <p class="foot-note"><strong>Implied values are this entry&rsquo;s own claim.</strong> They are computed from
+      the snapshot figures by the one stated formula above. They are not prices, not predictions, and not
+      investment advice. Snapshot source and date are shown at the top of the page.</p>
+    <p class="foot-note" id="foot-source"></p>
+  </footer>
+
+  <noscript><p class="noscript">This board needs JavaScript: every number it shows is read from the snapshot data
+    file next to this page, with no network.</p></noscript>
+</div>
+<script src="data.js"></script>
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
